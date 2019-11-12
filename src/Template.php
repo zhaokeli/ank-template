@@ -698,6 +698,35 @@ class Template
     }
 
     /**
+     * 解析模板文件名
+     * @access private
+     * @param  string   $template 文件名
+     * @return string
+     */
+    protected function parseTemplateFile(string $template): string
+    {
+        if ('' == pathinfo($template, PATHINFO_EXTENSION)) {
+
+            if (0 !== strpos($template, '/')) {
+                $template = str_replace(['/', ':'], $this->config['view_depr'], $template);
+            } else {
+                $template = str_replace(['/', ':'], $this->config['view_depr'], substr($template, 1));
+            }
+
+            $template = $this->config['view_path'] . $template . '.' . ltrim($this->config['view_suffix'], '.');
+        }
+
+        if (is_file($template)) {
+            // 记录模板文件的更新时间
+            $this->includeFile[$template] = filemtime($template);
+
+            return $template;
+        }
+
+        throw new Exception('template not exists:' . $template);
+    }
+
+    /**
      * 检查编译缓存是否有效
      * 如果无效则需要重新编译
      * @access private
@@ -1268,35 +1297,6 @@ class Template
 
             unset($matches);
         }
-    }
-
-    /**
-     * 解析模板文件名
-     * @access private
-     * @param  string   $template 文件名
-     * @return string
-     */
-    private function parseTemplateFile(string $template): string
-    {
-        if ('' == pathinfo($template, PATHINFO_EXTENSION)) {
-
-            if (0 !== strpos($template, '/')) {
-                $template = str_replace(['/', ':'], $this->config['view_depr'], $template);
-            } else {
-                $template = str_replace(['/', ':'], $this->config['view_depr'], substr($template, 1));
-            }
-
-            $template = $this->config['view_path'] . $template . '.' . ltrim($this->config['view_suffix'], '.');
-        }
-
-        if (is_file($template)) {
-            // 记录模板文件的更新时间
-            $this->includeFile[$template] = filemtime($template);
-
-            return $template;
-        }
-
-        throw new Exception('template not exists:' . $template);
     }
 
     /**
